@@ -1,0 +1,117 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "FunctionAppName": {
+            "type": "string"
+        },
+        "StorageAccountName": {
+            "type": "string"
+        },
+        "SQLDBFailoverMonitor_Server": {
+            "type": "string"
+        },
+        "SQLDBFailoverMonitor_User": {
+            "type": "string"
+        },
+        "SQLDBFailoverMonitor_Password": {
+            "type": "string"
+        },
+        "SendGridAPIKey": {
+            "type": "string"
+        },
+        "SQLDBFailoverMonitor_NotifyAddress": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('StorageAccountName')]",
+            "apiVersion": "2018-07-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "Storage"
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "kind": "functionapp",
+            "name": "[parameters('FunctionAppName')]",
+            "apiVersion": "2018-11-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName'))]"
+            ],
+            "properties": {
+                "name": "[parameters('FunctionAppName')]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "dotnet"
+                        },
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('StorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName')), '2015-05-01-preview').key1)]"
+                        },
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~2"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('StorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName')), '2015-05-01-preview').key1)]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTSHARE",
+                            "value": "[concat(toLower(parameters('FunctionAppName')), toLower(uniqueString(resourceGroup().id)))]"
+                        },
+                        {
+                            "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                            "value": "8.11.1"
+                        },
+                        {
+                            "name": "SQLDBFailoverMonitor_Server",
+                            "value": "[parameters('SQLDBFailoverMonitor_Server')]"
+                        },
+                        {
+                            "name": "SQLDBFailoverMonitor_User",
+                            "value": "[parameters('SQLDBFailoverMonitor_User')]"
+                        },
+                        {
+                            "name": "SQLDBFailoverMonitor_Password",
+                            "value": "[parameters('SQLDBFailoverMonitor_Password')]"
+                        },
+                        {
+                            "name": "SendGridAPIKey",
+                            "value": "[parameters('SendGridAPIKey')]"
+                        },
+                        {
+                            "name": "SQLDBFailoverMonitor_NotifyAddress",
+                            "value": "[parameters('SQLDBFailoverMonitor_NotifyAddress')]"
+                        }
+                    ]
+                },
+                "clientAffinityEnabled": false,
+                "reserved": false
+            },
+            "resources": [
+                {
+                    "apiVersion": "2018-11-01",
+                    "name": "web",
+                    "type": "sourcecontrols",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites/', parameters('FunctionAppName'))]"
+                    ],
+                    "properties": {
+                        "RepoUrl": "https://github.com/vitomaz-msft/SQLDBFailoverMonitor",
+                        "branch": "master",
+                        "IsManualIntegration": "false"
+                    }
+                }
+            ]
+        }
+    ]
+}

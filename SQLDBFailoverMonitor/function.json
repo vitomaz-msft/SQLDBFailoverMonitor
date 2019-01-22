@@ -1,0 +1,32 @@
+{
+  "bindings": [
+    {
+      "type": "timerTrigger",
+      "name": "myTimer",
+      "schedule": "0 0/5 * * * *",
+      "direction": "in"
+    },
+    {
+      "type": "sendGrid",
+      "name": "$return",
+      "direction": "out",
+      "apiKey": "SendGridAPIKey",
+      "from": "SQL DB Failover Monitor <functions@azure.com>"
+    },
+    {
+      "type": "blob",
+      "name": "myInputBlob",
+      "path": "sqldbfailovermonitor/lastCheck",
+      "connection": "AzureWebJobsStorage",
+      "direction": "in"
+    },
+    {
+      "type": "blob",
+      "name": "myOutputBlob",
+      "path": "sqldbfailovermonitor/lastCheck",
+      "connection": "AzureWebJobsStorage",
+      "direction": "out"
+    }
+  ],
+  "disabled": false
+}

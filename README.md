@@ -2,7 +2,7 @@
 Checks for changes in sys.geo_replication_links (master database of the specified server)
 
 A SendGrid API Key is necessary, please follow the instructions below in case you don't have one already.
-After getting the SendGrid API Key you can use this button to deploy SQL Data Sync Failure Monitor in Azure:
+After getting the SendGrid API Key you can use this button to deploy SQL DB failover monitor in Azure:
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fvitomaz-msft%2FSQLDBFailoverMonitor%2Fmaster%2Ftemplate.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
